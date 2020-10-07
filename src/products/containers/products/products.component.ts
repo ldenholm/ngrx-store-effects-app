@@ -3,8 +3,9 @@ import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { Store } from "@ngrx/store";
 // grab observable for type checking
 import { Observable } from "rxjs/Observable";
+// grab store
 import * as fromStore from "../../store";
-
+//grab pizza interface
 import { Pizza } from "../../models/pizza.model";
 import { ProductState } from "../../store";
 
@@ -17,14 +18,14 @@ import { ProductState } from "../../store";
         <a class="btn btn__ok" routerLink="./new"> New Pizza </a>
       </div>
       <div class="products__list">
-        <div *ngIf="!pizzas?.length">No pizzas, add one to get started.</div>
-        <pizza-item *ngFor="let pizza of pizzas" [pizza]="pizza"> </pizza-item>
+        <div *ngIf="!((pizzas$ | async)?.length)">No pizzas, add one to get started.</div>
+        <pizza-item *ngFor="let pizza of (pizzas$ | async)" [pizza]="pizza"> </pizza-item>
       </div>
     </div>
   `,
 })
 export class ProductsComponent implements OnInit {
-  pizzas: Pizza[];
+  pizzas$: Observable<Pizza>[];
 
   /* 
      type check anything we access inside of here (constructor),
@@ -35,8 +36,9 @@ export class ProductsComponent implements OnInit {
 
   ngOnInit() {
     // how do we obtain properties from our store?
-    this.store.select<any>('products').subscribe(state => {
-      console.log(state)
+    this.store.select(fromStore.getAllPizzas).subscribe(state => {
+      //console.log(state)
+      this.pizzas$ = this.store.select(fromStore.getAllPizzas);
     })
   }
 }
